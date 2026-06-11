@@ -139,6 +139,15 @@ body { background: #e9e7e2; display: flex; align-items: center; justify-content:
   display: flex; align-items: center; justify-content: center;
   transition: opacity 0.2s;
 }
+#s3-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.30);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 4;
+}
+#s3-overlay.visible { opacity: 1; pointer-events: auto; }
 </style>
 </head>
 <body>
@@ -289,6 +298,8 @@ body { background: #e9e7e2; display: flex; align-items: center; justify-content:
   });
 
   var s3 = document.getElementById('s3');
+  var s3Overlay = document.getElementById('s3-overlay');
+  var s3PlayTimer = null;
   var playVid = document.getElementById('play-vid');
 
   function fmt(t) {
@@ -325,7 +336,7 @@ body { background: #e9e7e2; display: flex; align-items: center; justify-content:
   // Play/pause
   document.getElementById('play-pause-btn').addEventListener('click', function(e) {
     e.stopPropagation();
-    if (playVid.paused) { playVid.play(); } else { playVid.pause(); }
+    if (playVid.paused) { playVid.play(); s3Overlay.classList.remove('visible'); } else { playVid.pause(); s3Overlay.classList.add('visible'); }
   });
   playVid.addEventListener('play', function() {
     document.getElementById('pause-icon').style.display = '';
@@ -375,6 +386,15 @@ body { background: #e9e7e2; display: flex; align-items: center; justify-content:
   document.getElementById('s2-video-wrap').addEventListener('click', function(e) {
     e.stopPropagation(); if(state !== 2) return;
     state = 3; s3.classList.add('active'); playVid.currentTime = 0; playVid.play();
+    if (s3PlayTimer) clearTimeout(s3PlayTimer);
+    s3Overlay.classList.remove('visible');
+    s3PlayTimer = setTimeout(function() { playVid.pause(); s3Overlay.classList.add('visible'); }, 2000);
+  });
+
+  s3Overlay.addEventListener('click', function(e) {
+    e.stopPropagation();
+    playVid.play();
+    s3Overlay.classList.remove('visible');
   });
 </script>
 </body>
